@@ -1,91 +1,113 @@
-# Sample Ton Jetton Contract
+# Staking Contract Using Jetton Wallet for Record Keeping
 
-This repository contains a blueprint project for creating and deploying a Jetton contract on the TON blockchain. The project includes the smart contract written in the Tact language and a deploy script that allows users to customize their Jetton token's attributes, such as name, description, symbol, and image.
-
-Check my Youtube [Nikandr Surkov](https://www.youtube.com/@NikandrSurkov) for more tutorials and guides.
+This staking system uses the **Jetton principle**, where users stake TON by sending it to the master contract. The master contract mints staked Jettons and sends them to the user's **Jetton wallet**, which tracks the staking date. Users can withdraw their staked TON by burning staked Jettons from their wallet.
 
 ## Features
 
-- **Ton Jetton Smart Contract**: Written in Tact language, the contract includes features such as minting, burning, and transferring tokens.
-- **Deploy Script**: Easily customizable script to deploy your Jetton contract with personalized attributes.
-- **Maximum Supply Control**: Ensure the total supply of tokens cannot exceed a specified limit.
-- **Mintable Flag**: Control whether new tokens can be minted after deployment.
-- **Owner Permissions**: Only the owner can mint new tokens and update certain contract parameters.
+1. **Decentralized Record Keeping**:
+   - The **Jetton wallet** records the date of staking when it receives staked Jettons, not the master contract.
+   - This approach eliminates the need to store all staking data in one main contract, reducing on-chain storage costs and improving scalability. Each user's Jetton wallet independently handles their staking records, creating a decentralized and efficient solution.
 
-## Customizable Attributes
+2. **Stake TON**:
+   - Users send TON to the master contract.
+   - The master contract mints staked Jettons and sends them to the user's Jetton wallet.
 
-Before deploying the contract, you can update the following attributes in the deploy script:
+3. **Withdraw Staked TON**:
+   - Users send their staked Jettons back to the master contract.
+   - The contract calculates the equivalent TON based on the Jetton amount and sends it to the user.
 
-- **Name**: The name of your Jetton token.
-- **Description**: A brief description of your Jetton token.
-- **Symbol**: The symbol representing your Jetton token.
-- **Image**: A URL or IPFS link to an image representing your Jetton token.
+4. **Send Restriction for Staked Jettons**:
+   - Staked Jettons can only be sent to the master contract. Any attempt to transfer staked Jettons to another address will fail, ensuring that the staking mechanism remains secure and prevents misuse.
 
-## How to Use
+5. **Flexible Reward System**:
+   - Rewards can be calculated based on the staking duration stored in the Jetton wallet.
 
-1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/nikandr-surkov/Sample-Ton-Jetton-Contract.git
-    ```
+---
 
-2. **Navigate to the Project Directory**:
-    ```bash
-    cd sample-ton-jetton-contract
-    ```
+## Contract Workflow
 
-3. **Install Dependencies**:
-    ```bash
-    npm install
-    ```
+### 1. Staking TON
+- Users send TON to the master contract.
+- The master contract:
+  - Mints staked Jettons equivalent to the TON amount sent, based on the **1 TON = 10 staked TON** ratio for testing purposes.
+  - Transfers the staked Jettons to the user's **Jetton wallet**.
+- The **Jetton wallet**:
+  - Records the date of receiving the staked Jettons, which serves as the staking start time.
+  - Ensures staked Jettons can only be sent back to the master contract.
 
-4. **Build the Contract**:
-    ```bash
-    npx blueprint build
-    ```
+#### **Example Staking Transaction**:
+- **Transaction Hash**: [58d5513561933ed6b828a7861f93bd83a0a8f27c9a99b7b534b174e4b216bd74](https://tonviewer.com/transaction/58d5513561933ed6b828a7861f93bd83a0a8f27c9a99b7b534b174e4b216bd74)
+- **Description**: 
+  - A user sent 1 TON to the master contract.
+  - The master contract minted 10 staked Jettons and transferred them to the user's Jetton wallet.
+  - The Jetton wallet recorded the staking start date.
 
-5. **Customize the Deploy Script**:
-    - Open the `deploy.js` file.
-    - Update the `name`, `description`, `symbol`, and `image` variables with your desired values.
+---
 
-6. **Deploy the Contract**:
-    ```bash
-    npx blueprint run
-    ```
+### 2. Withdrawing Staked TON
+- Users send their staked Jettons back to the master contract.
+- The master contract:
+  - Queries the staking start date from the user's Jetton wallet.
+  - Calculates the TON equivalent based on the **1 TON = 1 staked TON** ratio for testing purposes.
+  - Sends the calculated TON to the user.
 
-## Contract Overview
+#### **Example Withdrawal Transaction**:
+- **Transaction Hash**: [Your Withdrawal Example Transaction](#) (Add a valid link here)
+- **Description**: 
+  - The user sent 10 staked Jettons back to the master contract.
+  - The master contract calculated the equivalent 1 TON and sent it to the user's wallet.
 
-### Ton Jetton Contract
+---
 
-The Ton Jetton contract is based on the TEP-74 standard and includes the following features:
+## Testing Supply Adjustment
+- During testing, the following temporary ratios are used:
+  - **1 TON = 10 staked TON** for staking.
+  - **1 TON = 1 staked TON** for withdrawals.
+- These adjustments are solely for testing purposes to create a larger supply of staked Jettons during initial trials. In the final deployment, a **1 TON = 1 staked TON** ratio will be used consistently for both staking and withdrawals.
 
-- **Minting**: Allows the owner to mint new tokens up to the maximum supply.
-- **Burning**: Enables token holders to burn their tokens, reducing the total supply.
-- **Transferring**: Supports transferring tokens between addresses.
-- **Metadata**: Stores metadata such as name, description, symbol, and image URL.
+---
 
-### Example Initialization
+## Restrictions on Staked Jettons
+- Staked Jettons are restricted and can **only** be sent back to the master contract.
+- Any attempt to send staked Jettons to an address other than the master contract will fail.
+- This restriction ensures the integrity of the staking system and prevents misuse or unauthorized transfers.
 
-```tact
-init(owner: Address, content: Cell, max_supply: Int) {
-    self.totalSupply = 0;
-    self.owner = owner;
-    self.mintable = true;
-    self.content = content;
-    self.max_supply = max_supply;
-}
-```
+---
 
-### Example Minting Function
+## Contract Functions
 
-```tact
-receive(msg: Mint) {
-    let ctx: Context = context();
-    require(ctx.sender == self.owner, "Not Owner");
-    require(self.mintable, "Can't Mint Anymore");
-    self.mint(msg.receiver, msg.amount, self.owner);
-}
-```
+### Master Contract
 
-## License
+#### **stake**
+- **Description**: Users send TON to the master contract to mint staked Jettons.
+- **Inputs**:
+  - `amount`: The amount of TON to stake.
+- **Outputs**:
+  - Staked Jettons are minted and sent to the user's Jetton wallet.
 
-This project is licensed under the MIT License.
+#### **withdraw**
+- **Description**: Users send their staked Jettons back to the master contract to withdraw their TON.
+- **Process**:
+  - The contract queries the staking start date from the user's Jetton wallet.
+  - Calculates the TON equivalent (and rewards, if any) based on the testing ratio or final ratio.
+  - Sends the TON (and rewards, if any) to the user.
+
+---
+
+## Advantages of this Approach
+
+1. **Reduced On-Chain Storage Costs**:
+   - By delegating staking record-keeping to individual Jetton wallets, the master contract avoids storing large amounts of user-specific data.
+
+2. **Improved Scalability**:
+   - Each user's Jetton wallet independently tracks staking information, allowing the system to scale without overloading the master contract.
+
+3. **Transparency and Decentralization**:
+   - Users can verify their staking records directly from their Jetton wallets, ensuring trustless and transparent operations.
+
+4. **Restricted Transfers for Security**:
+   - Staked Jettons can only be transferred to the master contract, reducing the risk of misuse and ensuring a secure staking process.
+
+---
+
+This approach is ideal for scalable and decentralized staking mechanisms on blockchain networks like TON.
