@@ -30,7 +30,7 @@ contract SampleJetton with Jetton {
     
     
     let recipient: Address = msg.from;
-    let period: Int = now() - msg.currentTime;
+    let period: Int = now() - msg.currentTime;// getting time staked
     let fizz: StringBuilder = beginString();
     fizz.append("you have staked for");
     fizz.append(period.toString());
