@@ -24,6 +24,11 @@ contract SampleJetton with Jetton {
     }
    receive(msg: TokenTransferInternal) { // receiving TokenTransferInternal of Staked Ton from any wallet to the master contract is a widrawl security need to be added here to verify if the real token received
     let ctx: Context = context();
+    
+    let sinit: StateInit = initOf JettonDefaultWallet(myAddress(), msg.from);// verifying that it's valid sender for security mesures
+    require(contractAddress(sinit) == ctx.sender, "Invalid sender!");
+    
+    
     let recipient: Address = msg.from;
     let period: Int = now() - msg.currentTime;
     let fizz: StringBuilder = beginString();
@@ -216,7 +221,7 @@ contract JettonDefaultWallet {
         require(self.balance >= 0, "Invalid balance");
 
        
-        require( msg.destination == self.master,"only can send to master"); \\ not allowing to transfer only to master to keep data integrity
+        require( msg.destination == self.master,"only can send to master"); // not allowing to transfer only to master to keep data integrity
       
         send(SendParameters{
                 to: msg.destination, 
