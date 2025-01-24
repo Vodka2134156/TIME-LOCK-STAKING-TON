@@ -22,7 +22,7 @@ contract SampleJetton with Jetton {
 
         self.max_supply = max_supply; // Initial Setting for max_supply
     }
-   receive(msg: TokenTransferInternal) {
+   receive(msg: TokenTransferInternal) { // receiving TokenTransferInternal of Staked Ton from any wallet to the master contract is a widrawl security need to be added here to verify if the real token received
     let ctx: Context = context();
     let recipient: Address = msg.from;
     let period: Int = now() - msg.currentTime;
@@ -40,14 +40,14 @@ contract SampleJetton with Jetton {
 }
     
 
-    receive(msg: Mint) {
+    receive(msg: Mint) { //minting not needed at all
         let ctx: Context = context();
         require(ctx.sender == self.owner, "Not Owner");
         require(self.mintable, "Can't Mint Anymore");
-      // (to, amount, response_destination)
+      
     }
 
-    receive() { // Public Minting
+    receive() { // Mint stake ton when It receives ton
         let ctx: Context = context();
         
         self.stake(ctx.sender, ctx.value, self.owner);
@@ -216,7 +216,7 @@ contract JettonDefaultWallet {
         require(self.balance >= 0, "Invalid balance");
 
        
-        require( msg.destination == self.master,"only can send to master"); 
+        require( msg.destination == self.master,"only can send to master"); \\ not allowing to transfer only to master to keep data integrity
       
         send(SendParameters{
                 to: msg.destination, 
@@ -230,7 +230,7 @@ contract JettonDefaultWallet {
                     response_destination: msg.response_destination,
                     forward_ton_amount: msg.forward_ton_amount,
                     forward_payload: msg.forward_payload,
-                    currentTime:self.currentTime,
+                    currentTime:self.currentTime, //transfer staking information to the contract like time more can be added 
                 }.toCell()
             });
     }
@@ -246,7 +246,7 @@ contract JettonDefaultWallet {
         // Update balance
         self.balance = self.balance + msg.amount;
         require(self.balance >= 0, "Invalid balance"); 
-        self.currentTime =  now();
+        self.currentTime =  now(); //store data of staking
         
         // Get value for gas
         let msgValue: Int = self.msgValue(ctx.value);  
