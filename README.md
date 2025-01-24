@@ -36,7 +36,7 @@ This staking system uses the **Jetton principle**, where users stake TON by send
   - Ensures staked Jettons can only be sent back to the master contract.
 
 #### **Example Staking Transaction**:
-- **Transaction Hash**: [58d5513561933ed6b828a7861f93bd83a0a8f27c9a99b7b534b174e4b216bd74](https://tonviewer.com/transaction/58d5513561933ed6b828a7861f93bd83a0a8f27c9a99b7b534b174e4b216bd74)
+- **Transaction Hash**: [tonviewer](https://tonviewer.com/transaction/f2d12e9b91086263657b990f6b66890043e7a7c989c43fc683f0a35c31d8a048)
 - **Description**: 
   - A user sent 1 TON to the master contract.
   - The master contract minted 10 staked Jettons and transferred them to the user's Jetton wallet.
@@ -52,7 +52,7 @@ This staking system uses the **Jetton principle**, where users stake TON by send
   - Sends the calculated TON to the user.
 
 #### **Example Withdrawal Transaction**:
-- **Transaction Hash**: [Your Withdrawal Example Transaction](#) (Add a valid link here)
+- **Transaction Hash**: [TonViewer Link](https://tonviewer.com/transaction/f535ce00409ff63b4b8b0ec20b17a196d39e7d777efb8125efd2df108401a25f) (Add a valid link here)
 - **Description**: 
   - The user sent 10 staked Jettons back to the master contract.
   - The master contract calculated the equivalent 1 TON and sent it to the user's wallet.
