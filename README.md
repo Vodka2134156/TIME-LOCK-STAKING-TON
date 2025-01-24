@@ -36,10 +36,10 @@ This staking system uses the **Jetton principle**, where users stake TON by send
   - Ensures staked Jettons can only be sent back to the master contract.
 
 #### **Example Staking Transaction**:
-- **Transaction Hash**: [tonviewer](https://tonviewer.com/transaction/f2d12e9b91086263657b990f6b66890043e7a7c989c43fc683f0a35c31d8a048)
+- **Transaction Hash**: [tonviewer](https://tonviewer.com/transaction/5f3e6323943d5ff5d28caab4650208a6eabefb3cea73efa84b10ee92c930c761)
 - **Description**: 
-  - A user sent 1 TON to the master contract.
-  - The master contract minted 10 staked Jettons and transferred them to the user's Jetton wallet.
+  - A user sent 0.07 TON to the master contract.
+  - The master contract minted 0.7 staked Jettons and transferred them to the user's Jetton wallet. I did a 1-10 ration to have more in hand for tests.
   - The Jetton wallet recorded the staking start date.
 
 ---
@@ -54,8 +54,8 @@ This staking system uses the **Jetton principle**, where users stake TON by send
 #### **Example Withdrawal Transaction**:
 - **Transaction Hash**: [TonViewer Link](https://tonviewer.com/transaction/f535ce00409ff63b4b8b0ec20b17a196d39e7d777efb8125efd2df108401a25f) (Add a valid link here)
 - **Description**: 
-  - The user sent 10 staked Jettons back to the master contract.
-  - The master contract calculated the equivalent 1 TON and sent it to the user's wallet.
+  - The user sent 0.8 staked Jettons back to the master contract.
+  - The master contract calculated the equivalent 0.8 TON and sent it to the user's wallet wiith message of how much time he staked.
 
 ---
 
