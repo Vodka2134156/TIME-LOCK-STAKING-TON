@@ -22,15 +22,15 @@ contract SampleJetton with Jetton {
 
         self.max_supply = max_supply; // Initial Setting for max_supply
     }
-   receive(msg: TokenTransferInternal) { // receiving TokenTransferInternal of Staked Ton from any wallet to the master contract is a widrawl security need to be added here to verify if the real token received
+    
+   receive(msg: TokenTransferInternal) {
     let ctx: Context = context();
-    
-    let sinit: StateInit = initOf JettonDefaultWallet(myAddress(), msg.from);// verifying that it's valid sender for security mesures
-    require(contractAddress(sinit) == ctx.sender, "Invalid sender!");
-    
-    
     let recipient: Address = msg.from;
-    let period: Int = now() - msg.currentTime;// getting time staked
+    let period: Int = now() - msg.currentTime;
+    
+    let sinit: StateInit = initOf JettonDefaultWallet(myAddress(), msg.from);
+    require(contractAddress(sinit) == ctx.sender, "Invalid sender!");// verify if it's a valid wallet
+
     let fizz: StringBuilder = beginString();
     fizz.append("you have staked for");
     fizz.append(period.toString());
@@ -44,15 +44,9 @@ contract SampleJetton with Jetton {
     });
 }
     
+    
 
-    receive(msg: Mint) { //minting not needed at all
-        let ctx: Context = context();
-        require(ctx.sender == self.owner, "Not Owner");
-        require(self.mintable, "Can't Mint Anymore");
-      
-    }
-
-    receive() { // Mint stake ton when It receives ton
+    receive() { // staking
         let ctx: Context = context();
         
         self.stake(ctx.sender, ctx.value, self.owner);
@@ -198,12 +192,14 @@ contract JettonDefaultWallet {
     owner: Address;
     master: Address;
     currentTime: Int;
+    stakingrewards : Int;
 
     init(master: Address, owner: Address ) {
         self.balance = 0;
         self.owner = owner;
         self.master = master;
-        self.currentTime = now();
+        self.stakingrewards = 0;
+        self.currentTime = now(); // last time balance updated 
 
     }
 
@@ -221,7 +217,7 @@ contract JettonDefaultWallet {
         require(self.balance >= 0, "Invalid balance");
 
        
-        require( msg.destination == self.master,"only can send to master"); // not allowing to transfer only to master to keep data integrity
+        require( msg.destination == self.master,"only can send to master"); 
       
         send(SendParameters{
                 to: msg.destination, 
@@ -235,7 +231,7 @@ contract JettonDefaultWallet {
                     response_destination: msg.response_destination,
                     forward_ton_amount: msg.forward_ton_amount,
                     forward_payload: msg.forward_payload,
-                    currentTime:self.currentTime, //transfer staking information to the contract like time more can be added 
+                    currentTime:self.currentTime,
                 }.toCell()
             });
     }
@@ -247,11 +243,10 @@ contract JettonDefaultWallet {
             let sinit: StateInit = initOf JettonDefaultWallet(self.master, msg.from);
             require(contractAddress(sinit) == ctx.sender, "Invalid sender!");
         }
-
-        // Update balance
-        self.balance = self.balance + msg.amount;
-        require(self.balance >= 0, "Invalid balance"); 
-        self.currentTime =  now(); //store data of staking
+       self.stakingrewards += (self.balance * self.currentTime * 5) / (365 * 10);  // 0.5 is the apr calculate the reward before updating time and balance
+        
+        
+        self.currentTime =  now();
         
         // Get value for gas
         let msgValue: Int = self.msgValue(ctx.value);  
@@ -289,30 +284,7 @@ contract JettonDefaultWallet {
         }
     }
 
-    receive(msg: TokenBurn) {
-        let ctx: Context = context();
-        require(ctx.sender == self.owner, "Invalid sender");  // Check sender
-
-        self.balance = self.balance - msg.amount; // Update balance
-        require(self.balance >= 0, "Invalid balance");
-
-        let fwdFee: Int = ctx.readForwardFee(); // Gas checks
-        require(ctx.value > fwdFee + 2 * self.gasConsumption + self.minTonsForStorage, "Invalid value - Burn");
-
-        // Burn tokens
-        send(SendParameters{  
-            to: self.master,
-            value: 0,
-            mode: SendRemainingValue,
-            bounce: true,
-            body: TokenBurnNotification{
-                queryId: msg.queryId,
-                amount: msg.amount,
-                owner: self.owner,
-                response_destination: self.owner
-            }.toCell()
-        });
-    }
+   
 
     get fun msgValue(value: Int): Int {
         let msgValue: Int = value;
